@@ -1,0 +1,9 @@
+h1 {
+    display: inline;
+}
+h1, h4 {
+    font-weight: bold;
+}
+.panel {
+    margin-left: 5rem;
+}

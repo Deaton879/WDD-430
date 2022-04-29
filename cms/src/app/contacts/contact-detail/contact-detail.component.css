@@ -1,0 +1,18 @@
+h1 {
+    display: inline;
+}
+h1, h4, h5 {
+    font-weight: bold;
+}
+.panel {
+    margin-left: 5rem;
+}
+.panel-heading {
+    padding-bottom: 5rem;
+}
+.btn {
+    margin: .5rem;
+}
+img {
+    display: inline;
+}
