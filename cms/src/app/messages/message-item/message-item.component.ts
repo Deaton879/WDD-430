@@ -8,9 +8,11 @@ import { Message } from '../message.model';
 })
 export class MessageItemComponent implements OnInit {
   @Input() message!: Message;
+  
   constructor() { }
 
   ngOnInit(): void {
   }
-
+  
+  
 }
