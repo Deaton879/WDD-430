@@ -8,24 +8,31 @@ import { Subject } from 'rxjs';
 export class RecipeService {
     recipesChanged = new Subject<Recipe[]>();
 
-    private recipes: Recipe[] = [
-        new Recipe('Tasty Schnitzel', 
-                   'This is simply a test.', 
-                   'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse1.mm.bing.net%2Fth%3Fid%3DOIP.g_WpteVluMseFNVzp3c_KQHaLH%26pid%3DApi&f=1',
-                   [
-                       new Ingredient('Meat', 1),
-                       new Ingredient('French Fries', 20)
-                   ]),
-        new Recipe('Big Fat Burger',
-                   'Another test recipe test.',
-                   'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse1.mm.bing.net%2Fth%3Fid%3DOIP.g_WpteVluMseFNVzp3c_KQHaLH%26pid%3DApi&f=1',
-                   [
-                       new Ingredient('Buns', 2),
-                       new Ingredient('Meat', 1)
-                   ])
-    ];
+    // private recipes: Recipe[] = [
+    //     new Recipe('Tasty Schnitzel', 
+    //                'This is simply a test.', 
+    //                'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse1.mm.bing.net%2Fth%3Fid%3DOIP.g_WpteVluMseFNVzp3c_KQHaLH%26pid%3DApi&f=1',
+    //                [
+    //                    new Ingredient('Meat', 1),
+    //                    new Ingredient('French Fries', 20)
+    //                ]),
+    //     new Recipe('Big Fat Burger',
+    //                'Another test recipe test.',
+    //                'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse1.mm.bing.net%2Fth%3Fid%3DOIP.g_WpteVluMseFNVzp3c_KQHaLH%26pid%3DApi&f=1',
+    //                [
+    //                    new Ingredient('Buns', 2),
+    //                    new Ingredient('Meat', 1)
+    //                ])
+    // ];
 
+    private recipes: Recipe[] = [];
+    
     constructor(private slService: ShoppingListService){}
+
+    setRecipes(recipes: Recipe[]) {
+        this.recipes = recipes;
+        this.recipesChanged.next(this.recipes.slice());
+    }
 
     getRecipes() {
         return this.recipes.slice();
