@@ -31,22 +31,25 @@ export class MessageService {
     }
 
     getMessage(id: string) {
-        this.messages.forEach(message => {
-            if(message.id === id){
-                return message;
-            }
-            else { return null; }
-        });
+        // this.messages.forEach(message => {
+        //     if(message.id === id){
+        //         return message;
+        //     }
+        //     else { return null; }
+        // });
+        return this.messages.find((message) => message.id == id);    
     }
 
-    getMessages(): Message[] {
+    getMessages() {
         this.http
-            .get(
-                'https://dkecms-default-rtdb.firebaseio.com/messages.json'
+            .get<{message: string, posts: Message[]}>(
+                'http://localhost:3000/messages'
+                //'https://dkecms-default-rtdb.firebaseio.com/messages.json'
             )
             .subscribe({
-                next: (messages: Message[]) => {
-                    this.messages = messages;
+                next: (messages) => {
+                    this.messages = messages.posts;
+                    console.log(this.messages);
                     this.maxMessageId = this.getMaxId();
                     this.messages.sort();
                     this.messageChangedEvent.next([...this.messages]);
@@ -57,9 +60,33 @@ export class MessageService {
     }
 
     addMessage(message: Message) {
-        this.messages.push(message);
+
+        // this.messages.push(message);
+        // this.storeMessages();
+        // console.log(this.messages)
+        // make sure id of the new Message is empty
+        //message.id = '';
+    
+        const headers = new HttpHeaders({'Content-Type': 'application/json'});
+    
+        // add to database
+        this.http.post<{ mess: string, message: Message }>('http://localhost:3000/messages/',
+        message,
+        { headers: headers })
+        .subscribe(
+            (responseData) => {
+                // add new document to documents
+                console.log(responseData);
+                this.messages.push(responseData.message);
+                this.sortAndSend();
+            }
+        );
+    }
+    
+    sortAndSend() {
+        this.messages.sort();
         this.storeMessages();
-        console.log(this.messages)
+        this.messages = this.getMessages();
     }
 
     storeMessages() {
@@ -71,7 +98,8 @@ export class MessageService {
         }
         this.http
             .put(
-                'https://dkecms-default-rtdb.firebaseio.com/messages.json',
+                'http://localhost:3000/messages/',
+                //'https://dkecms-default-rtdb.firebaseio.com/messages.json',
                 messages,
                 httpOption
             )

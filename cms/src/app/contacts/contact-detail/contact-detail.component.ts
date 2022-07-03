@@ -22,6 +22,7 @@ export class ContactDetailComponent implements OnInit {
         (params: Params) => {
           this.id = params['id'];
           this.contact = this.contactService.getContact(this.id);
+          
         }
       );
   }

@@ -23,14 +23,16 @@ export class ContactService {
         return this.contacts.find((contact) => contact.id == id);      
     }
 
-    getContacts(): Contact[] {
+    getContacts() {
         this.http
-            .get(
-                'https://dkecms-default-rtdb.firebaseio.com/contacts.json'
+            .get<{message: string, posts: Contact[]}>(
+                'http://localhost:3000/contacts'
+                //'https://dkecms-default-rtdb.firebaseio.com/contacts.json'
             )
             .subscribe({
-                next: (contacts: Contact[]) => {
-                    this.contacts = contacts;
+                next: (contacts) => {
+                    this.contacts = contacts.posts;
+                    console.log(this.contacts)
                     this.maxContactId = this.getMaxId();
                     this.contacts.sort();
                     this.contactChangedEvent.next([...this.contacts]);
@@ -49,8 +51,17 @@ export class ContactService {
         if (pos < 0) {
            return;
         }
-        this.contacts.splice(pos, 1);
-        this.storeContacts();
+        // this.contacts.splice(pos, 1);
+        // this.storeContacts();
+
+        // delete from database
+        this.http.delete('http://localhost:3000/contacts/' + contact.id)
+        .subscribe(
+        (response: Response) => {
+            this.contacts.splice(pos, 1);
+            this.sortAndSend();
+        }
+        );
     }
 
     getMaxId() {
@@ -72,11 +83,34 @@ export class ContactService {
             return;
         }
 
-        this.maxContactId++;
-        newContact.id = this.maxContactId.toString();
-        this.contacts.push(newContact);
-        let contactListClone = this.contacts.slice();
+        // this.maxContactId++;
+        // newContact.id = this.maxContactId.toString();
+        // this.contacts.push(newContact);
+        // let contactListClone = this.contacts.slice();
+        // this.storeContacts();
+        
+        // make sure id of the new Contact is empty
+        // newContact.id = '';
+    
+        const headers = new HttpHeaders({'Content-Type': 'application/json'});
+    
+        // add to database
+        this.http.post<{ message: string, contact: Contact }>('http://localhost:3000/contacts/',
+        newContact,
+        { headers: headers })
+        .subscribe(
+            (responseData) => {
+            // add new document to documents
+            this.contacts.push(responseData.contact);
+            this.sortAndSend();
+            }
+        );
+    }
+
+    sortAndSend() {
+        this.contacts.sort();
         this.storeContacts();
+        this.contacts = this.getContacts();
     }
 
     updateContact(originalContact: Contact, newContact: Contact) {
@@ -90,10 +124,21 @@ export class ContactService {
             return;
         }
 
+        // set the id of the new Document to the id of the old Document
         newContact.id = originalContact.id;
-        this.contacts[pos] = newContact;
-        let contactListClone = this.contacts.slice();
-        this.storeContacts();
+        //newContact._id = originalContact._id;
+
+        const headers = new HttpHeaders({'Content-Type': 'application/json'});
+
+        // update database
+        this.http.put('http://localhost:3000/contacts/' + originalContact.id,
+        newContact, { headers: headers })
+        .subscribe(
+            (response: Response) => {
+                this.contacts[pos] = newContact;
+                this.sortAndSend();
+            }
+        );
     }
 
     storeContacts() {
@@ -105,7 +150,8 @@ export class ContactService {
         }
         this.http
             .put(
-                'https://dkecms-default-rtdb.firebaseio.com/contacts.json',
+                'http://localhost:3000/contacts/',
+                // 'https://dkecms-default-rtdb.firebaseio.com/contacts.json',
                 contacts,
                 httpOption
             )

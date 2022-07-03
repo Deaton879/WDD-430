@@ -28,6 +28,7 @@ export class DocumentDetailComponent implements OnInit {
         (params: Params) => {
           this.id = params['id'];
           this.document = this.documentService.getDocument(this.id);
+          //console.log(this.id)
         }
       );
   }
